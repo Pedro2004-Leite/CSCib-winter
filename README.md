@@ -33,7 +33,7 @@ One link per session. Replace `_` with the Google Docs URL. Weeks below are for 
 
 | Session | Week | Focus | Notes |
 |---|---|---|---|
-| L1  | 1  | Group formation, safety briefing, walkthrough of the guide | _ |
+| L1  | 1  | Group formation, safety briefing, walkthrough of the guide | [Doc](https://docs.google.com/document/d/1_0-e44QuGS5KOAtqIu-X_EtNi_SHTo455gdAAcgwZ2s/edit?usp=sharing) |
 | L2  | 2  | Simulink, signal generation, D/A, first motor command | _ |
 | L3  | 3  | A/D, sensor readings, calibration of `Kp` and `Ke` | _ |
 | L4  | 4  | Excitation signal design and collection of identification data | _ |
