@@ -21,3 +21,13 @@ The full report is written in `report/report.tex`.
 - Report deadline: 23:59, 7 December (session L12, week 14)
 - Class tutor (ccpsGPT): https://tinyurl.com/ccpsGPT
 - Link to L1 summary: https://tinyurl.com/29dpkmwz
+
+## Logistics
+
+The lecture calendar below sets the weekly sessions, the MAP30 assessment dates, and the exam date.
+
+![Lecture calendar for CSCibT01](lectures.png)
+
+The lab sessions rely on specific lecture modules, so it is important to keep the two schedules aligned.
+
+![Alignment between the lectures and the laboratory](labs.png)
