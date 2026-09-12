@@ -93,6 +93,9 @@ html/
 _minted*/
 *.pyg
 
+# Scratchpad LaTeX doc (working ideas, not the deliverable) and its build output
+report/prototype.pdf
+
 # ---------------------------------------------------------------
 # OS / misc
 # ---------------------------------------------------------------
