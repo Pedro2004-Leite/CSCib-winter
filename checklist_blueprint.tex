@@ -1,0 +1,107 @@
+% =====================================================================
+% Blueprint de checklist - CSCib (Configuracao do ambiente Simulink)
+%
+% Isto e' apenas o ESQUELETO (secoes + espaco para preencher).
+% O conteudo tecnico de cada item deves escrever tu, a partir da
+% leitura da Seccao 3 do guia de laboratorio.
+%
+% Como usar:
+%   1. Copia este ficheiro para um novo projeto no Overleaf.
+%   2. Em cada "checklist", substitui as linhas em branco pelos
+%      passos concretos (consulta as referencias de seccao indicadas
+%      em comentario acima de cada bloco).
+%   3. Os campos "Sessao" / "Data" no topo servem para reutilizares o
+%      mesmo documento em L2, L3, L4-L7, L8-L12, etc.
+% =====================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{amssymb}   % \square para as caixas de verificacao
+\usepackage{enumitem}
+\usepackage{titlesec}
+
+% --- Ambiente de checklist reutilizavel ---
+\newlist{checklist}{itemize}{1}
+\setlist[checklist]{label=$\square$, leftmargin=1.6em, itemsep=0.5em, topsep=0.3em}
+
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection}{0.8em}{}
+
+\title{Checklist -- Configura\c{c}\~ao do Ambiente de Simula\c{c}\~ao\\\large CSCib -- Laborat\'orio}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\vspace{-2em}
+
+\noindent
+\textbf{Sess\~ao:} \rule{3cm}{0.4pt} \hfill
+\textbf{Data:} \rule{3cm}{0.4pt} \hfill
+\textbf{PC usado:} \rule{3cm}{0.4pt}
+
+\vspace{1.5em}
+
+% ---------------------------------------------------------------------
+% Ver Seccao 3.2, passos 1-7 (o que NAO precisa de hardware)
+% ---------------------------------------------------------------------
+\section*{1. Prepara\c{c}\~ao em casa (antes da sess\~ao)}
+\begin{checklist}
+	\item
+	\item
+	\item
+	\item
+\end{checklist}
+
+% ---------------------------------------------------------------------
+% Ver Seccao 3.3, passo 10 (Configuration Parameters: Solver,
+% Code Generation, Hardware Implementation)
+% ---------------------------------------------------------------------
+\section*{2. No PC do laborat\'orio -- Ambiente de simula\c{c}\~ao}
+\begin{checklist}
+	\item
+	\item
+	\item
+\end{checklist}
+
+% ---------------------------------------------------------------------
+% Ver Seccao 3.3 (passos 8-9, D/A) e Seccao 3.4 (passos 14-15, A/D)
+% ---------------------------------------------------------------------
+\section*{3. No PC do laborat\'orio -- Blocos de entrada/sa\'ida}
+\begin{checklist}
+	\item
+	\item
+	\item
+	\item
+\end{checklist}
+
+% ---------------------------------------------------------------------
+% Ver "Read this with attention!" no in\'icio do guia
+% ---------------------------------------------------------------------
+\section*{4. Antes de correr -- Seguran\c{c}a}
+\begin{checklist}
+	\item
+	\item
+	\item
+\end{checklist}
+
+% ---------------------------------------------------------------------
+% O que fazer depois de parar a simula\c{c}\~ao
+% ---------------------------------------------------------------------
+\section*{5. Ap\'os a experi\^encia}
+\begin{checklist}
+	\item
+	\item
+	\item
+\end{checklist}
+
+\vspace{1.5em}
+\noindent\textbf{Notas / problemas encontrados nesta sess\~ao:}\\[0.5em]
+\rule{\linewidth}{0.4pt}\\[1em]
+\rule{\linewidth}{0.4pt}\\[1em]
+\rule{\linewidth}{0.4pt}
+
+\end{document}
