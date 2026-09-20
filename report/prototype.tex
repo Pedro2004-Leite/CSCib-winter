@@ -9,6 +9,8 @@
 \usepackage{enumitem}
 \usepackage{xcolor}
 \usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{float}
 
 \newcommand{\hint}[1]{\textit{\color{gray!70!black}Hint: #1}}
 \newcommand{\idea}{\vspace{4pt}\begin{itemize}[leftmargin=1.2em]\item[--] \end{itemize}\vspace{-8pt}}
@@ -114,5 +116,56 @@ Calibrating $K_p$ matters for the same reason: it converts the potentiometer vol
 real shaft angle $\theta$ used in $y=\theta+\alpha$ and in every model/controller built
 afterwards -- an error here silently rescales the whole plant model.
 
+
+\section*{3 -- Software for data acquisition and control}
+
+\subsection*{Q2 -- Interfacing the plant with the computer}
+\label{sec:q2}
+
+\subsubsection*{1. Motor operation}
+Already answered in Q1 (a) and (b): since $\dot\theta=\omega$, a constant $u\neq0$ gives a constant $\omega\neq0$, so $\theta$ keeps growing and never stabilizes.
+
+\subsubsection*{2. Sensor calibration}
+
+\paragraph{Block diagram.}
+The Signal Generator drives the \emph{Analog Output} (D/A), and one \emph{Analog Input} (A/D) per sensor is joined in a Mux before the Scope.
+Sample time is $0.001$ s in all blocks, and the model runs in \emph{External} mode.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{Figs/l3_full_diagram.png}
+\caption{Simulink model used for the calibrations: command signal to the motor through the D/A, and potentiometer and strain gage read through two A/D blocks.}
+\label{fig:l3-diagram}
+\end{figure}
+
+\paragraph{Sign convention.}
+The positive direction of $\theta$ is clockwise (CW).
+With $+1$ V applied to the motor, the potentiometer voltage increased (before wrapping around) while the shaft turned CW, so $K_p>0$.
+
+\paragraph{Potentiometer calibration, $K_p$.}
+With the bar detached from the motor, a constant $1$ V was applied and the potentiometer voltage $\theta_e$ was recorded at $1$ kHz.
+The last $10$ s were used, to discard the start-up transient.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{Figs/pot_graph.jpg}
+\caption{Potentiometer voltage $\theta_e$ [V] and command signal [V] against time [s], for a constant $1$ V applied to the motor without the bar.}
+\label{fig:pot-saw}
+\end{figure}
+
+With constant $u$ the speed is constant (Q1 (b)), so $\theta(t)=\theta_0+\omega t$.
+The potentiometer is linear, so each ramp of the sawtooth is a straight line with slope $s=\omega/K_p$ [V/s].
+The wiper wraps once per revolution, so the time $T$ between two resets is one turn, $\omega=360/T$ [deg/s].
+Therefore
+$$K_p=\frac{\omega}{s}=\frac{360}{T\,s}\quad[\text{deg/V}].$$
+
+The resets were detected as the samples where $\Delta\theta_e<-1$ V (\texttt{matlab/Kp\_Calc.m}), $T$ is the mean time between them, and $s$ is the mean of least-squares slopes fitted to each complete ramp.
+This gives $T=4.004$ s, hence $\omega=89.91$ deg/s, and $s=2.725$ V/s, so
+$$K_p=\frac{89.91}{2.725}=32.99\ \text{deg/V}.$$
+The two ramps taken separately give $32.999$ and $32.988$ deg/V.
+
+Note that $360^\circ/\Delta V$ is not a good estimate: the ramps span about $10.4$ V, which would give $34.6$ deg/V, about $5\%$ higher.
+The signal sits flat at about $\pm5.2$ V and glitches around the wrap, so part of the turn produces no linear voltage change.
+Only the slope-and-period method is insensitive to this.
 
 \end{document}

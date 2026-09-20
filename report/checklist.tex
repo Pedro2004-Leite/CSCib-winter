@@ -9,6 +9,7 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{float}
+\emergencystretch=3em
 
 \title{CSCib Lab Checklist}
 \author{}
@@ -208,8 +209,38 @@ save('tensao_pot.mat', 'tensao_pot')
   \texttt{1}). Confirmar na bancada qual o canal correto (etiqueta do conector, ou
   perguntar à equipa do laboratório) antes de escolher no bloco.
 
-  \item Inserir um bloco Scope (ou display) ligado a este novo A/D, para ler a
-  tensão do extensómetro.
+  \item Ler a tensão do extensómetro em direto, para a apontar na folha:
+  \begin{itemize}
+    \item Ligar ao novo A/D um bloco \texttt{Simulink} $\to$ \texttt{Sinks} $\to$
+    \texttt{Display}, e alterar o \emph{Format} para \texttt{short} ou
+    \texttt{long}, conforme as casas decimais que quiseres ler. Em \emph{External
+    Mode} o valor atualiza-se no ecrã durante a experiência.
+    \item O sinal tem ruído, e um número que oscila é difícil de apontar. Colocar
+    entre o A/D e o Display um bloco \texttt{Discrete} $\to$ \texttt{Discrete FIR
+    Filter}, com \emph{Coefficients} \texttt{ones(1,200)/200} (média móvel de
+    $0.2$ s a $1$ kHz). O valor apontado é o do Display, o Scope continua a
+    receber o sinal sem filtrar.
+    \item Manter o Scope, mas resolver o problema do gráfico cortado (ver o
+    passo seguinte). O gráfico serve para confirmar que o sinal está bem, não para
+    ler valores.
+  \end{itemize}
+
+  \item \textbf{Gráfico cortado no Scope:} abrir \emph{Parameters} $\to$
+  \emph{Axes}, e definir \emph{Y-min} $= -10$ e \emph{Y-max} $= 10$ (ou usar
+  \emph{Autoscale} depois de correr). Se o valor lido ficar fora dos limites por
+  omissão, o gráfico aparece cortado. Em \emph{Parameters} $\to$ \emph{History},
+  desativar \emph{Limit data points to last} (por omissão são $5000$ pontos, ou
+  seja, só $5$ s a $1$ kHz), porque isso também limita o que é guardado no
+  workspace.
+
+  \item \textbf{Plano B, sem depender do ecrã:} depois de parar a experiência,
+  ler o valor a partir do workspace:
+  \begin{verbatim}
+mean(tensao_ext.signals.values(end-500:end))
+  \end{verbatim}
+  (com \texttt{tensao\_ext} o nome da variável do Scope do extensómetro). Isto dá
+  a média dos últimos $0.5$ s, sem ruído, e pode ser repetido para cada ranhura,
+  gravando um ficheiro por ranhura.
 
   \item Para cada ranhura do pente, defletir a barra até essa ranhura e registar a
   tensão elétrica correspondente. Calcular o ângulo de deflexão de cada ranhura por
@@ -263,6 +294,131 @@ save('tensao_pot.mat', 'tensao_pot')
   \item No final, seguir novamente os dois últimos pontos da checklist
   transversal: copiar a pasta de trabalho para a pen, e apagar do PC do
   laboratório.
+\end{enumerate}
+
+\section*{Checklist L4: recolha de dados de identificação (Secção 4 do guia)}
+
+Avisos de segurança: os mesmos indicados na secção do L2, válidos também aqui.
+Nesta sessão a barra \textbf{está montada no motor} e o cabo do extensómetro está ligado.
+Posicionar o cabo de forma a perturbar o menos possível a barra, e parar de imediato se a barra derivar para um lado e começar a arrastá-lo.
+
+\textbf{Objetivo:} sair da bancada com as 5 experiências abaixo, todas gravadas e verificadas.
+O guia avisa que dados inutilizáveis não podem ser recolhidos de novo no L5.
+
+\subsection*{Ordem de prioridade das experiências}
+
+Fazer por esta ordem.
+As três primeiras são o mínimo pedido pelo guia, e as duas últimas servem para discutir no Q3 o efeito de amplitudes muito pequenas e muito grandes.
+Se o tempo apertar, as últimas são as primeiras a cair.
+
+\begin{table}[H]
+  \centering
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \renewcommand{\arraystretch}{1.6}
+  \begin{tabular}{|c|l|l|l|c|c|}
+    \hline
+    \textbf{\#} & \textbf{Ficheiro} & \textbf{Uso} & \textbf{Sinal} & \textbf{Amp. (V)} & \textbf{Freq. (Hz)} \\
+    \hline
+    1 & \texttt{exp1\_quad\_1V.mat} & identificação & quadrada & $1$ & $0.4$ \\
+    \hline
+    2 & \texttt{exp2\_prbs\_1V.mat} & identificação & PRBS & $\pm 1$ & --- \\
+    \hline
+    3 & \texttt{exp3\_val.mat} & só validação & PRBS (outra banda) & $\pm 1$ & --- \\
+    \hline
+    4 & \texttt{exp4\_quad\_peq.mat} & Q3 (amp. pequena) & quadrada & $0.3$* & $0.4$ \\
+    \hline
+    5 & \texttt{exp5\_quad\_grande.mat} & Q3 (amp. grande) & quadrada & $2$* & $0.4$ \\
+    \hline
+  \end{tabular}
+  \caption{Plano das experiências do L4, todas com $40$ s e $T_s=0.02$ s.
+  *Valores iniciais, a ajustar na bancada: na 4, subir ou descer até a barra mal se mover (zona morta); na 5, não passar de $2$ V sem confirmação da equipa do laboratório.}
+\end{table}
+
+\subsection*{Antes da sessão (em casa)}
+
+\begin{enumerate}[label=$\square$, leftmargin=1.5em]
+  \item Escrever o script de identificação (\texttt{.m}) com o código da Secção 4 do guia, e testá-lo com dados sintéticos (simular um modelo conhecido e confirmar que o \texttt{armax} o recupera).
+  O guia avisa que um grupo que chega ao L5 sem este script a funcionar não tem tempo para o escrever.
+  O script deve ler o \texttt{.mat}, calcular \texttt{ytrend = thetae*Kp + alphae*Ke}, diferenciar e filtrar a saída (\texttt{af = 0.8}), aplicar \texttt{detrend} à entrada, e identificar com \texttt{armax}.
+
+  \item Ter os sinais das experiências 2 e 3 em ficheiros \texttt{.mat} (\texttt{u\_prbs.mat} e \texttt{u\_val.mat}).
+  Há duas opções equivalentes:
+  \begin{itemize}
+    \item \emph{Usar os ficheiros já feitos} (gerados e verificados em casa): basta copiá-los para a pasta de trabalho.
+    \item \emph{Gerá-los na hora}: correr \texttt{gera\_prbs} (em \texttt{matlab/}) na pasta de trabalho.
+    O script gera os dois sinais, grava os \texttt{.mat} e verifica-os (valores $\pm 1$, patamares, média, excursão).
+    Só usar os sinais se terminar com ``Todos os sinais verificados''.
+    Requer a \emph{System Identification Toolbox} (\texttt{idinput}); se não estiver disponível no PC do laboratório, usar os ficheiros já feitos.
+  \end{itemize}
+  Os \texttt{.mat} são compatíveis com o MATLAB R2015a.
+  A primeira coluna é o tempo, a segunda a tensão em volts.
+  A banda \texttt{[0 0.1]} é um ponto de partida (o sinal muda de valor, no máximo, de $10$ em $10$ amostras, ou seja, $0.2$ s), a rever depois de ver os dados.
+  O conjunto de validação usa uma banda diferente, \texttt{[0 0.05]} (muda no máximo de $20$ em $20$ amostras, ou seja, $0.4$ s), para não ser igual ao de identificação.
+
+  \item Copiar para a pen os dois ficheiros \texttt{u\_prbs.mat} e \texttt{u\_val.mat}, os scripts \texttt{gera\_prbs.m} e \texttt{verifica\_dados.m} (em \texttt{matlab/}) e o modelo do L3 (com o Signal Generator, o \texttt{Analog Output} e os dois \texttt{Analog Input}).
+
+  \item Imprimir esta checklist, com a tabela do plano.
+\end{enumerate}
+
+\subsection*{No laboratório}
+
+\begin{enumerate}[label=$\square$, leftmargin=1.5em]
+  \item Seguir a checklist transversal: abrir o MATLAB R2015a, criar a pasta de trabalho com permissões de escrita, defini-la como \emph{Current Folder}, e confirmar com \texttt{pwd}.
+
+  \item \textbf{Primeiro, medir o $K_e$} (últimos passos da checklist L3), com a barra na bancada de calibração e o cabo no extensómetro.
+  Só depois montar a barra no motor.
+
+  \item Abrir o modelo do L3 e confirmar que o canal do extensómetro (o mesmo usado na calibração) está correto.
+
+  \item \textbf{Alterações no Simulink} (uma só vez, antes da primeira experiência):
+  \begin{itemize}
+    \item \textbf{Período de amostragem $0.02$ s} nos três blocos de hardware (\texttt{Analog Output} e os dois \texttt{Analog Input}) e no Scope.
+    No L2 e L3 era \texttt{0.001}, e esquecer esta alteração é o erro mais provável.
+    \item Em \emph{Configuration Parameters} (\texttt{Ctrl+E}) $\to$ \emph{Solver}: \emph{Fixed-step size} $=$ \texttt{0.02} e \emph{Stop time} $=$ \texttt{40} (sem isto a experiência não pára sozinha aos 40\,s).
+    \item \emph{External Mode Control Panel} $\to$ \emph{Signal \& Triggering}: \emph{Duration} $=$ \texttt{2001} (40 s a 50 Hz, mais a amostra inicial).
+    \item Scope, \emph{Parameters} $\to$ \emph{History}: desativar \emph{Limit data points to last}, ativar \emph{Save data to workspace}, formato \emph{Structure With Time}, e dar à variável o nome \texttt{dados}.
+    Este nome fica fixo para todas as experiências, e o que muda é o nome do ficheiro gravado (ver abaixo).
+    \item Confirmar que o Mux tem as três entradas pela ordem: excitação, potenciómetro, extensómetro.
+    \item \textcolor{red}{\textbf{Valor inicial e final do Analog Output exatamente 0.}}
+  \end{itemize}
+
+  \item \textbf{Fonte do sinal de excitação}, conforme a experiência:
+  \begin{itemize}
+    \item \emph{Experiências 1, 4 e 5:} bloco \texttt{Signal Generator}, \emph{Wave form} $=$ \texttt{square}, \emph{Units} $=$ \texttt{Hertz}, \emph{Frequency} $=$ \texttt{0.4}, e \emph{Amplitude} conforme a tabela (o sinal é $\pm$ a amplitude).
+    \item \emph{Experiências 2 e 3:} trocar o Signal Generator por um bloco \texttt{From Workspace} (com \texttt{load('u\_prbs.mat')} ou \texttt{load('u\_val.mat')} no MATLAB antes), \emph{Data} $=$ \texttt{u\_prbs} (ou \texttt{u\_val}), \emph{Sample time} $=$ \texttt{0.02}, \emph{Interpolate data} desativado, e \emph{Form output after final data value by} $=$ \texttt{Setting to zero}.
+  \end{itemize}
+
+  \item Pedir à equipa do laboratório para confirmar toda a configuração, antes da primeira corrida.
+
+  \item \textbf{Para cada experiência, pela ordem da tabela:}
+  \begin{enumerate}[label=(\alph*)]
+    \item Confirmar que a barra está parada e em repouso (esperar que as oscilações acabem), com alguém com o dedo perto do interruptor do amplificador.
+    \item Ajustar a fonte do sinal (passo anterior) e a amplitude.
+    \item Correr (botão $\blacktriangleright$). A simulação pára sozinha aos $40$ s.
+    \item Gravar logo na linha de comandos, com o nome da tabela:
+    \begin{verbatim}
+save('exp1_quad_1V.mat', 'dados')
+    \end{verbatim}
+    \item Verificar a qualidade dos dados (passo seguinte), \textbf{antes} de passar à experiência seguinte.
+  \end{enumerate}
+
+  \item \textbf{Verificação dos dados}, logo após cada corrida, com o script \texttt{verifica\_dados.m} (na pasta de trabalho):
+  \begin{verbatim}
+verifica_dados('exp1_quad_1V.mat')
+verifica_dados('exp4_quad_peq.mat', 0.3)   % com a amplitude esperada
+  \end{verbatim}
+  O script imprime \texttt{[OK]} ou \texttt{[FALHA]} para cada verificação (dimensões $2001 \times 3$, passo de $0.02$ s, sem NaN, amplitude da excitação, potenciómetro sem salto de extremo a extremo, sem saturação em $\pm 10$ V, extensómetro não constante) e desenha os três sinais.
+  Confirmar ainda \textbf{a olho} nos gráficos:
+  \begin{itemize}
+    \item a coluna 1 tem a forma pedida;
+    \item o potenciómetro cresce ou decresce continuamente, com a inclinação a mudar quando a excitação muda (Figura 11 do guia);
+    \item o extensómetro oscila com as transições da excitação;
+    \item na experiência 4 é normal a barra mal se mover e o extensómetro quase não responder (o script pode assinalar \texttt{[FALHA]} no extensómetro), é esse o efeito que se quer registar.
+  \end{itemize}
+  Se falhar, repetir a experiência antes de avançar.
+
+  \item Antes de sair da bancada, confirmar que os cinco ficheiros existem (\texttt{dir *.mat}), copiar a pasta de trabalho completa para a pen, e apagá-la do PC do laboratório.
 \end{enumerate}
 
 \end{document}

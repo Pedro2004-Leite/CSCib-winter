@@ -9,6 +9,7 @@
 \usepackage{xcolor}
 \usepackage{graphicx}
 \usepackage{float}
+\emergencystretch=3em
 
 \title{CSCib Lab Checklist}
 \author{}
@@ -212,8 +213,36 @@ save('tensao_pot.mat', 'tensao_pot')
   channel at the bench (connector label, or ask the laboratory staff) before
   choosing it in the block.
 
-  \item Insert a Scope block (or a display) connected to this new A/D block, to
-  read the strain gage voltage.
+  \item Read the strain gage voltage live, to write it on the sheet:
+  \begin{itemize}
+    \item Connect a \texttt{Simulink} $\to$ \texttt{Sinks} $\to$ \texttt{Display}
+    block to the new A/D, and set \emph{Format} to \texttt{short} or \texttt{long},
+    depending on how many decimals you want. In \emph{External Mode} the value
+    updates on screen during the experiment.
+    \item The signal is noisy, and a fluctuating number is hard to write down.
+    Insert a \texttt{Discrete} $\to$ \texttt{Discrete FIR Filter} block between the
+    A/D and the Display, with \emph{Coefficients} \texttt{ones(1,200)/200} (a
+    $0.2$ s moving average at $1$ kHz). The value written down is the Display's,
+    and the Scope keeps receiving the unfiltered signal.
+    \item Keep the Scope, but fix the clipped plot (see the next step). The plot is
+    for checking that the signal looks right, not for reading values.
+  \end{itemize}
+
+  \item \textbf{Clipped Scope plot:} open \emph{Parameters} $\to$ \emph{Axes}, and
+  set \emph{Y-min} $= -10$ and \emph{Y-max} $= 10$ (or use \emph{Autoscale} after
+  running). If the measured value falls outside the default limits, the plot looks
+  clipped. In \emph{Parameters} $\to$ \emph{History}, disable \emph{Limit data
+  points to last} (the default is $5000$ points, that is, only $5$ s at $1$ kHz),
+  because it also limits what is saved to the workspace.
+
+  \item \textbf{Plan B, not relying on the screen:} after stopping the experiment,
+  read the value from the workspace:
+  \begin{verbatim}
+mean(strain_v.signals.values(end-500:end))
+  \end{verbatim}
+  (with \texttt{strain\_v} the variable name of the strain gage Scope). This gives
+  the mean of the last $0.5$ s, free of noise, and can be repeated for each slot,
+  saving one file per slot.
 
   \item For each slot of the comb, deflect the bar to that slot and record the
   corresponding electrical tension. Compute the deflection angle of each slot with
@@ -266,6 +295,131 @@ save('tensao_pot.mat', 'tensao_pot')
   \item At the end, follow the last two points of the cross-session checklist
   again: copy the working folder to the pen drive, and delete it from the
   laboratory PC.
+\end{enumerate}
+
+\section*{L4 checklist: collecting identification data (Section 4 of the guide)}
+
+Safety warnings: the same as in the L2 section, valid here too.
+In this session the bar \textbf{is mounted on the motor} and the strain gage cable is connected.
+Route the cable so that it disturbs the bar as little as possible, and stop immediately if the bar drifts to one side and starts dragging it.
+
+\textbf{Goal:} leave the bench with the 5 experiments below, all saved and checked.
+The guide warns that unusable data cannot be recollected in L5.
+
+\subsection*{Priority order of the experiments}
+
+Do them in this order.
+The first three are the minimum asked by the guide, and the last two are for discussing in Q3 the effect of very small and very large amplitudes.
+If time runs short, the last ones are the first to drop.
+
+\begin{table}[H]
+  \centering
+  \small
+  \setlength{\tabcolsep}{4pt}
+  \renewcommand{\arraystretch}{1.6}
+  \begin{tabular}{|c|l|l|l|c|c|}
+    \hline
+    \textbf{\#} & \textbf{File} & \textbf{Use} & \textbf{Signal} & \textbf{Amp. (V)} & \textbf{Freq. (Hz)} \\
+    \hline
+    1 & \texttt{exp1\_sq\_1V.mat} & identification & square & $1$ & $0.4$ \\
+    \hline
+    2 & \texttt{exp2\_prbs\_1V.mat} & identification & PRBS & $\pm 1$ & --- \\
+    \hline
+    3 & \texttt{exp3\_val.mat} & validation only & PRBS (other band) & $\pm 1$ & --- \\
+    \hline
+    4 & \texttt{exp4\_sq\_small.mat} & Q3 (small amp.) & square & $0.3$* & $0.4$ \\
+    \hline
+    5 & \texttt{exp5\_sq\_large.mat} & Q3 (large amp.) & square & $2$* & $0.4$ \\
+    \hline
+  \end{tabular}
+  \caption{Plan of the L4 experiments, all with $40$ s and $T_s=0.02$ s.
+  *Initial values, to be adjusted at the bench: in 4, raise or lower until the bar barely moves (dead zone); in 5, do not exceed $2$ V without the lab staff's confirmation.}
+\end{table}
+
+\subsection*{Before the session (at home)}
+
+\begin{enumerate}[label=$\square$, leftmargin=1.5em]
+  \item Write the identification script (\texttt{.m}) with the code from Section 4 of the guide, and test it with synthetic data (simulate a known model and confirm that \texttt{armax} recovers it).
+  The guide warns that a group arriving at L5 without a working script has no time to write it.
+  The script should read the \texttt{.mat} file, compute \texttt{ytrend = thetae*Kp + alphae*Ke}, differentiate and filter the output (\texttt{af = 0.8}), apply \texttt{detrend} to the input, and identify with \texttt{armax}.
+
+  \item Have the signals for experiments 2 and 3 in \texttt{.mat} files (\texttt{u\_prbs.mat} and \texttt{u\_val.mat}).
+  There are two equivalent options:
+  \begin{itemize}
+    \item \emph{Use the ready-made files} (generated and checked at home): just copy them to the working folder.
+    \item \emph{Generate them on the spot}: run \texttt{gera\_prbs} (in \texttt{matlab/}) in the working folder.
+    The script generates both signals, saves the \texttt{.mat} files and checks them ($\pm 1$ values, hold times, mean, excursion).
+    Only use the signals if it ends with ``Todos os sinais verificados''.
+    It requires the \emph{System Identification Toolbox} (\texttt{idinput}); if it is not available on the lab PC, use the ready-made files.
+  \end{itemize}
+  The \texttt{.mat} files are compatible with MATLAB R2015a.
+  The first column is time, the second is the voltage in volts.
+  The band \texttt{[0 0.1]} is a starting point (the signal changes value at most every $10$ samples, that is, $0.2$ s), to be reviewed after seeing the data.
+  The validation set uses a different band, \texttt{[0 0.05]} (it changes value at most every $20$ samples, that is, $0.4$ s), so that it is not identical to the identification one.
+
+  \item Copy to the flash drive the two files \texttt{u\_prbs.mat} and \texttt{u\_val.mat}, the scripts \texttt{gera\_prbs.m} and \texttt{verifica\_dados.m} (in \texttt{matlab/}) and the L3 model (with the Signal Generator, the \texttt{Analog Output} and the two \texttt{Analog Input} blocks).
+
+  \item Print this checklist, with the plan table.
+\end{enumerate}
+
+\subsection*{In the laboratory}
+
+\begin{enumerate}[label=$\square$, leftmargin=1.5em]
+  \item Follow the cross-session checklist: open MATLAB R2015a, create the working folder with write permissions, set it as \emph{Current Folder}, and confirm with \texttt{pwd}.
+
+  \item \textbf{First, measure $K_e$} (last steps of the L3 checklist), with the bar on the calibration bench and the cable on the strain gage.
+  Only then mount the bar on the motor.
+
+  \item Open the L3 model and confirm that the strain gage channel (the one used in the calibration) is correct.
+
+  \item \textbf{Changes in Simulink} (once, before the first experiment):
+  \begin{itemize}
+    \item \textbf{Sample time $0.02$ s} in the three hardware blocks (\texttt{Analog Output} and the two \texttt{Analog Input}) and in the Scope.
+    L2 and L3 used \texttt{0.001}, and forgetting this change is the most likely mistake.
+    \item In \emph{Configuration Parameters} (\texttt{Ctrl+E}) $\to$ \emph{Solver}: \emph{Fixed-step size} $=$ \texttt{0.02} and \emph{Stop time} $=$ \texttt{40} (without this the experiment does not stop by itself at 40\,s).
+    \item \emph{External Mode Control Panel} $\to$ \emph{Signal \& Triggering}: \emph{Duration} $=$ \texttt{2001} (40 s at 50 Hz, plus the initial sample).
+    \item Scope, \emph{Parameters} $\to$ \emph{History}: disable \emph{Limit data points to last}, enable \emph{Save data to workspace}, format \emph{Structure With Time}, and name the variable \texttt{dados}.
+    This name stays fixed for all experiments, and what changes is the name of the saved file (see below).
+    \item Confirm that the Mux has the three inputs in order: excitation, potentiometer, strain gage.
+    \item \textcolor{red}{\textbf{Initial and final value of the Analog Output exactly 0.}}
+  \end{itemize}
+
+  \item \textbf{Excitation signal source}, depending on the experiment:
+  \begin{itemize}
+    \item \emph{Experiments 1, 4 and 5:} \texttt{Signal Generator} block, \emph{Wave form} $=$ \texttt{square}, \emph{Units} $=$ \texttt{Hertz}, \emph{Frequency} $=$ \texttt{0.4}, and \emph{Amplitude} as in the table (the signal is $\pm$ the amplitude).
+    \item \emph{Experiments 2 and 3:} replace the Signal Generator with a \texttt{From Workspace} block (with \texttt{load('u\_prbs.mat')} or \texttt{load('u\_val.mat')} in MATLAB beforehand), \emph{Data} $=$ \texttt{u\_prbs} (or \texttt{u\_val}), \emph{Sample time} $=$ \texttt{0.02}, \emph{Interpolate data} disabled, and \emph{Form output after final data value by} $=$ \texttt{Setting to zero}.
+  \end{itemize}
+
+  \item Ask the lab staff to confirm the whole configuration, before the first run.
+
+  \item \textbf{For each experiment, in the order of the table:}
+  \begin{enumerate}[label=(\alph*)]
+    \item Confirm that the bar is still and at rest (wait for oscillations to die out), with someone keeping a finger near the amplifier switch.
+    \item Set the signal source (previous step) and the amplitude.
+    \item Run (button $\blacktriangleright$). The simulation stops by itself at $40$ s.
+    \item Save right away on the command line, with the name from the table:
+    \begin{verbatim}
+save('exp1_sq_1V.mat', 'dados')
+    \end{verbatim}
+    \item Check the data quality (next step) \textbf{before} moving on to the next experiment.
+  \end{enumerate}
+
+  \item \textbf{Data check}, right after each run, with the \texttt{verifica\_dados.m} script (in the working folder):
+  \begin{verbatim}
+verifica_dados('exp1_sq_1V.mat')
+verifica_dados('exp4_sq_small.mat', 0.3)   % with the expected amplitude
+  \end{verbatim}
+  The script prints \texttt{[OK]} or \texttt{[FALHA]} (fail) for each check (dimensions $2001 \times 3$, $0.02$ s step, no NaN, excitation amplitude, potentiometer without an extreme-to-extreme jump, no saturation at $\pm 10$ V, strain gage not constant) and plots the three signals.
+  Also confirm \textbf{by eye} in the plots:
+  \begin{itemize}
+    \item column 1 has the requested shape;
+    \item the potentiometer grows or decreases continuously, with the slope changing when the excitation changes (Figure 11 of the guide);
+    \item the strain gage oscillates with the excitation transitions;
+    \item in experiment 4 it is normal for the bar to barely move and the strain gage to barely respond (the script may flag \texttt{[FALHA]} on the strain gage), that is the effect to be recorded.
+  \end{itemize}
+  If it fails, repeat the experiment before moving on.
+
+  \item Before leaving the bench, confirm that the five files exist (\texttt{dir *.mat}), copy the whole working folder to the flash drive, and delete it from the lab PC.
 \end{enumerate}
 
 \end{document}
