@@ -8,7 +8,7 @@ function verifica_dados(ficheiro, amp_esperada)
 % colunas: 1 excitacao, 2 potenciometro, 3 extensometro.
 
 Ts = 0.02;      % periodo de amostragem esperado [s]
-N  = 2001;      % numero de amostras esperado
+D  = 40;        % duracao recomendada [s] (guia: "algumas dezenas" de segundos)
 
 S = load(ficheiro);
 if ~isfield(S, 'dados')
@@ -19,9 +19,12 @@ s = S.dados.signals.values;
 
 fprintf('\n%s\n', ficheiro);
 
-% 1. Dimensoes
-verifica(size(s,2) == 3 && size(s,1) == N, ...
-    sprintf('dimensoes %d x %d (esperado %d x 3)', size(s,1), size(s,2), N));
+% 1. Dimensoes e duracao
+verifica(size(s,2) == 3, sprintf('%d colunas (esperado 3)', size(s,2)));
+fprintf('       duracao: %.1f s (%d amostras)\n', t(end) - t(1), numel(t));
+if t(end) - t(1) < D - 1
+    fprintf('  [AVISO] duracao curta (o guia sugere algumas dezenas de segundos)\n');
+end
 if size(s,2) < 3
     error('Faltam colunas: nao da para continuar.');
 end

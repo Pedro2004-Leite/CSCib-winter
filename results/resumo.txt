@@ -1,0 +1,51 @@
+Resultados L5-L6
+================
+
+L5 - Identificacao: ordens testadas e ajuste nos dados de validacao
+-------------------------------------------------------------------
+
+exp2_quad_1V.mat
+na  nb  nc    ajuste [%]
+   2   1   2      77.9
+   2   2   2      83.3
+   2   3   2      82.4
+   3   1   3      82.1
+   3   2   3      79.6
+   3   3   3      79.7
+   4   1   4      81.4
+   4   2   4      86.3
+   4   3   4      86.5
+Escolhido: na=4, nb=3, nc=4 (ajuste 86.5 %)
+
+exp2_rand_1V.mat
+na  nb  nc    ajuste [%]
+   2   1   2      42.4
+   2   2   2      83.6
+   2   3   2      79.7
+   3   1   3      77.7
+   3   2   3      79.9
+   3   3   3      80.2
+   4   1   4      80.9
+   4   2   4      83.2
+   4   3   4      84.9
+Escolhido: na=4, nb=3, nc=4 (ajuste 84.9 %)
+
+exp_sinewave.mat
+na  nb  nc    ajuste [%]
+   2   1   2      80.5
+   2   2   2      67.5
+   2   3   2     -2121482395343896205450311947517952.0
+   3   1   3      79.9
+   3   2   3      59.3
+   3   3   3      -1.4
+   4   1   4      61.4
+   4   2   4      40.8
+   4   3   4      32.6
+Escolhido: na=2, nb=1, nc=2 (ajuste 80.5 %)
+
+L6 - Validacao do modelo com integrador
+---------------------------------------
+--- L6: exp2_quad_1V ---
+  Ajuste validacao (dados nunca usados): 70.3 %
+  Ajuste simulacao (dados de treino):    15.5 %
+  Sem deriva linear: validacao 75.7 %, treino 75.1 %
