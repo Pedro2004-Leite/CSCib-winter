@@ -36,12 +36,12 @@ saveas(gcf, '../results/final_step.png')
 
 % Caracterizacao para o relatorio
 k_est = polyval(M.num1, 1)/polyval(M.den1, 1)/Ts;   % [graus/s por V]
-[~, Pm, Wcg, ~] = margin(sys);
+[~, Pm, ~, Wcp] = margin(sys);   % Wcp: frequencia a que o ganho cruza 0 dB
 disp('Polos:'), disp(eig(A))
 disp('Zeros:'), disp(roots(M.num1))
 fprintf('Ganho estatico (sem integrador): %.2f graus/s por V\n', k_est)
-if ~isempty(Wcg)
-    fprintf('Fase em 0 dB: %.1f graus em %.3f rad/s\n', Pm-180, Wcg)
+if ~isempty(Wcp)
+    fprintf('Fase em 0 dB: %.1f graus em %.3f rad/s\n', Pm-180, Wcp)
 end
 
 fid = fopen('../results/resumo.txt', 'a');
@@ -50,7 +50,7 @@ fprintf(fid, '  Matrizes A, B, C, D em models/final.mat\n');
 fprintf(fid, '  Polos: %s\n', mat2str(eig(A)', 4));
 fprintf(fid, '  Zeros: %s\n', mat2str(roots(M.num1)', 4));
 fprintf(fid, '  Ganho estatico (sem integrador): %.2f graus/s por V\n', k_est);
-if ~isempty(Wcg)
-    fprintf(fid, '  Fase em 0 dB: %.1f graus em %.3f rad/s\n', Pm-180, Wcg);
+if ~isempty(Wcp)
+    fprintf(fid, '  Fase em 0 dB: %.1f graus em %.3f rad/s\n', Pm-180, Wcp);
 end
 fclose(fid);

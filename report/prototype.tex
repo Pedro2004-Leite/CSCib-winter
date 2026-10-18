@@ -13,6 +13,9 @@
 \usepackage{float}
 
 \newcommand{\hint}[1]{\textit{\color{gray!70!black}Hint: #1}}
+\renewcommand{\figurename}{Fig.}
+\newcommand{\todo}[1]{\textbf{\color{red!70!black}[TODO: #1]}}
+\newcommand{\figfile}[2]{\IfFileExists{Figs/#1.pdf}{\includegraphics[width=#2]{Figs/#1.pdf}}{\fbox{\parbox{#2}{\centering\color{red!70!black}missing \detokenize{Figs/#1.pdf}: run matlab/figuras\_q3.m\vspace{2.5cm}}}}}
 \newcommand{\idea}{\vspace{4pt}\begin{itemize}[leftmargin=1.2em]\item[--] \end{itemize}\vspace{-8pt}}
 
 \title{CSCib Lab notes}
@@ -110,6 +113,25 @@ trials, so it must be fitted by least squares rather than assumed. Any error in 
 systematic scaling error in $\alpha$, in the combined output $y=\theta+\alpha$, and in the
 $|\alpha|\le10^\circ$ safety limit.
 
+\paragraph{Procedure.}
+The bar was deflected with a comb whose slots are $6.35$ mm ($1/4$ in) apart, following the sequence of slots $0,1,\dots,7,0,-1,\dots,-7,0$, and the strain-gage voltage $\alpha_e$ settled on a plateau at each slot (Fig.~\ref{fig:ke}(a)).
+The plateaus were found where the local standard deviation of $\alpha_e$ is low, discarding $0.5$ s at each end to remove the transients, and the mean voltage of each one was taken.
+For a slot offset $D$ the tip deflection angle is $\alpha\approx D/L$, with $L=0.42$ m the length of the bar, so the extreme slots $\pm7$ correspond to $\pm6.06^\circ$.
+Positive slots are those for which $\alpha_e>0$, which defines the positive direction of $\alpha$.
+Since $\alpha=K_e\alpha_e$, $K_e$ is the slope of the least-squares line through the origin of the points $(\alpha_e,\alpha)$:
+$$K_e=\frac{\sum_i\alpha_{e,i}\,\alpha_i}{\sum_i\alpha_{e,i}^2}=3.97\ \text{deg/V}.$$
+
+\begin{figure}[t]
+\centering
+\figfile{q2_ke}{\linewidth}
+\caption{Strain-gage calibration with the comb. (a) Voltage $\alpha_e$ while the bar is moved through the slots; the orange parts are the plateaus used and the numbers are the slot indices. (b) Mean voltage of each plateau against the deflection angle $\alpha$, and the least-squares line through the origin, whose slope is $K_e$.}
+\label{fig:ke}
+\end{figure}
+
+The line follows the points with an rms error of $0.52^\circ$ and a maximum of $0.83^\circ$ ($R^2=0.978$), as Fig.~\ref{fig:ke}(b) shows.
+The deviations are systematic and not random: the plateau of slot $4$ lies below the line, and when the bar goes back to the rest position after slot $7$ the voltage reads $-0.17$ V instead of $0$, while the last rest plateau reads $0.00$ V.
+This is the slight nonlinearity and hysteresis of the strain gage mentioned above, so $K_e$ is an average gain, with an uncertainty of about $\pm1^\circ$ in $\alpha$, which is small against the shaft angle but not against the deflection itself ($|\alpha|\le6^\circ$ in the experiments).
+
 
 \subsection*{2.3 -- Shaft angle transducer}
 Calibrating $K_p$ matters for the same reason: it converts the potentiometer voltage into the
@@ -139,8 +161,9 @@ Sample time is $0.001$ s in all blocks, and the model runs in \emph{External} mo
 \end{figure}
 
 \paragraph{Sign convention.}
-The positive direction of $\theta$ is clockwise (CW).
-With $+1$ V applied to the motor, the potentiometer voltage increased (before wrapping around) while the shaft turned CW, so $K_p>0$.
+The positive direction of $\theta$ (and of $\alpha$) is counterclockwise (CCW), following the right-hand rule.
+The sign test of Q3 (Fig.~\ref{fig:sign}) shows that this is the direction in which the potentiometer voltage $\theta_e$ decreases.
+With $+1$ V applied to the motor the potentiometer voltage increases (before wrapping around), so the shaft turns clockwise, in the negative direction of $\theta$, and $K_p<0$.
 
 \paragraph{Potentiometer calibration, $K_p$.}
 With the bar detached from the motor, a constant $1$ V was applied and the potentiometer voltage $\theta_e$ was recorded at $1$ kHz.
@@ -155,17 +178,152 @@ The last $10$ s were used, to discard the start-up transient.
 
 With constant $u$ the speed is constant (Q1 (b)), so $\theta(t)=\theta_0+\omega t$.
 The potentiometer is linear, so each ramp of the sawtooth is a straight line with slope $s=\omega/K_p$ [V/s].
-The wiper wraps once per revolution, so the time $T$ between two resets is one turn, $\omega=360/T$ [deg/s].
+The wiper wraps once per revolution, so the time $T$ between two resets is one turn, and the speed is $\omega=-360/T$ [deg/s] (negative: for $u>0$ the shaft turns in the negative direction of $\theta$, see the sign convention).
 Therefore
-$$K_p=\frac{\omega}{s}=\frac{360}{T\,s}\quad[\text{deg/V}].$$
+$$K_p=\frac{\omega}{s}=-\frac{360}{T\,s}\quad[\text{deg/V}].$$
 
 The resets were detected as the samples where $\Delta\theta_e<-1$ V (\texttt{matlab/Kp\_Calc.m}), $T$ is the mean time between them, and $s$ is the mean of least-squares slopes fitted to each complete ramp.
-This gives $T=4.004$ s, hence $\omega=89.91$ deg/s, and $s=2.725$ V/s, so
-$$K_p=\frac{89.91}{2.725}=32.99\ \text{deg/V}.$$
-The two ramps taken separately give $32.999$ and $32.988$ deg/V.
+This gives $T=4.004$ s, hence $\omega=-89.91$ deg/s, and $s=2.725$ V/s, so
+$$K_p=\frac{-89.91}{2.725}=-32.99\ \text{deg/V}.$$
+The two ramps taken separately give $-32.999$ and $-32.988$ deg/V.
+(\texttt{Kp\_Calc.m} prints the magnitude; the sign comes from the convention above.)
 
-Note that $360^\circ/\Delta V$ is not a good estimate: the ramps span about $10.4$ V, which would give $34.6$ deg/V, about $5\%$ higher.
+Note that $360^\circ/\Delta V$ is not a good estimate: the ramps span about $10.4$ V, which would give $-34.6$ deg/V, about $5\%$ larger in magnitude.
 The signal sits flat at about $\pm5.2$ V and glitches around the wrap, so part of the turn produces no linear voltage change.
 Only the slope-and-period method is insensitive to this.
+
+
+\section*{4 -- Plant model identification}
+
+\subsection*{Q3 -- The plant model}
+\label{sec:q3}
+
+\paragraph{Sign convention.}
+The output is the tip angle $y=\theta+\alpha=K_p\theta_e+K_e\alpha_e$, so $\theta$ and $\alpha$ must share the same positive direction.
+To relate the signs of $K_p$ and $K_e$ the motor was switched off and the bar was moved by hand, back and forth (Fig.~\ref{fig:sign}).
+Every time $\theta_e$ falls, $\alpha_e$ rises, and vice-versa (five moves out of five); $\alpha_e$ goes back to zero, with a ringing at the bar mode, when the motion stops.
+The bar was pushed by hand, so it deflected towards the direction of motion.
+So $\alpha_e>0$ is a deflection towards the direction in which $\theta_e$ falls.
+With $K_e=+3.97$ deg/V, positive $\alpha$ is then that direction, and positive $\theta$ must be the same one: $K_p<0$ ($K_p=-32.99$ deg/V).
+The motor data agree: with $u>0$ the potentiometer voltage rises (correlation between $u$ and the rate of $\theta_e$ of $0.75$ to $0.94$ in the three $\pm1$ V records) and $\alpha_e$ tends to be positive (correlation with $u$ of $0.3$ to $0.5$), as expected when the tip lags the shaft.
+
+\begin{figure}[t]
+\centering
+\figfile{q3_signconv}{\linewidth}
+\caption{Sign convention test: motor off, bar pushed by hand. (a) Potentiometer voltage $\theta_e$. (b) Strain-gage voltage $\alpha_e$. The grey bands mark the five movements: when $\theta_e$ falls, $\alpha_e$ is positive, and when $\theta_e$ rises, $\alpha_e$ is negative. The oscillation after each movement is the free vibration of the bar.}
+\label{fig:sign}
+\end{figure}
+
+\paragraph{Excitation signals and amplitude.}
+The excitation was applied to the motor through the D/A with the Simulink acquisition model of Q2, sampled at $T_s=0.02$ s and recorded for $40$ s ($10$ s for the squares of $0.2$, $0.3$ and $1.5$ V); the first $5$ s of each record are discarded in the identification to remove the start-up transient.
+Three kinds of signal were used: square waves of $\pm0.15$, $0.2$, $0.3$, $1$ and $1.5$ V (period $2.5$ s, i.e.\ $0.4$ Hz); a pseudo-random binary sequence (PRBS) of $\pm1$ V whose levels last from $0.2$ to $1.4$ s; and a sine wave of $\pm1$ V and $0.4$ Hz.
+A second PRBS of $\pm1$ V, different from the first and with levels of $0.4$ to $2.4$ s, was recorded for validation only.
+Fig.~\ref{fig:amp} shows that the shaft speed grows linearly with the amplitude and vanishes at $0.22$ V: this is the dead zone of the motor and gearbox.
+Below it ($\pm0.15$ and $\pm0.2$ V) the plant does not move and the record carries no information; just above it ($\pm0.3$ V) the speed is only $7$ deg/s.
+At the other end, $\pm1.5$ V makes the strain gage reach $2.6$ V ($\approx10^\circ$, the safety limit) and the shaft turn $150^\circ$ in half a period, so the potentiometer wraps and the plant leaves its linear range.
+$\pm1$ V is a good compromise: well outside the dead zone, with the bar deflection below $6^\circ$.
+The square and random excitations give similar models (validation fits of $86.5\,\%$ and $84.9\,\%$, nearly equal poles, Table~\ref{tab:poles}), while the sine wave concentrates all the energy at $0.4$ Hz, whereas the PRBS spreads it over the whole band, and gives meaningless fits for larger orders; it was discarded.
+
+\begin{figure}[t]
+\centering
+\figfile{q3_amplitude}{\linewidth}
+\caption{Effect of the amplitude of a square-wave input (period $2.5$ s). (a) Shaft angle change for each amplitude: the shaft does not move for $\pm0.15$ and $\pm0.2$ V, and barely moves for $\pm0.3$ V. (b) Shaft speed in the first half period against amplitude; the line is fitted to the three largest amplitudes and meets zero at the dead zone, $0.22$ V (square).}
+\label{fig:amp}
+\end{figure}
+
+\paragraph{Sampling, filtering and orders.}
+The sampling period is $T_s=0.02$ s (sampling frequency $50$ Hz, Nyquist frequency $25$ Hz), as in the guide.
+The bar mode (Table~\ref{tab:poles}) is at $4.3$ Hz, well below the Nyquist frequency, with $11$ samples per period; at $T_s=0.10$ s it would have only $2.3$, which explains the drop in Fig.~\ref{fig:rev}(c).
+The output is differentiated and filtered by
+$$F(z)=\frac{(1-a_f)(1-z^{-1})}{1-a_f z^{-1}},$$
+a differentiator (which removes the integrator of the motor and the offset) followed by a low-pass with pole $a_f$ ($-\ln(0.8)/T_s=11$ rad/s for $a_f=0.8$).
+Too little filtering ($a_f=0.5$) lets noise through, and too much ($a_f=0.95$) starts to remove the dynamics to be identified; the fit is best for $a_f=0.7$--$0.8$ (Fig.~\ref{fig:rev}(a)).
+The filter acts on the output only, so the identified model is the plant in series with $F$.
+Repeating the identification with $a_f$ from $0.6$ to $0.9$ (\texttt{polos\_vs\_filtro.m}) leaves the bar mode at $0.73\pm0.42\mathrm{j}$, but the two real poles move: the positive one goes from $0.73$ to $0.91$ and the negative one from $-0.63$ to $-0.33$.
+So only the bar mode is a property of the plant alone, and the real poles describe the motor and the filter together.
+
+\begin{figure}[t]
+\centering
+\figfile{q3_review}{\linewidth}
+\caption{Fit on the validation set when the parameters of the identification are changed. (a) Filter pole $a_f$. (b) Model orders $n_a$ and $n_b$. (c) Sampling period $T_s$. In each panel the other parameters keep the values of the adopted model (orange square: $a_f=0.8$, $[n_a\,n_b]=[4\,3]$, $T_s=0.02$ s); $n_b$ is the order of the numerator.}
+\label{fig:rev}
+\end{figure}
+
+Physically, the plant is a motor (first order from voltage to speed) and a flexible bar (second order for the first mode), followed by the integrator that gives the angle.
+After the differentiation three poles of the plant remain (the motor and the bar mode) and the filter adds a fourth, so the model of the filtered output needs $n_a=4$, and with the integrator the state model has order five.
+Fig.~\ref{fig:rev}(b) shows that the fit depends on $n_a$ and $n_b$ together, and that many pairs reach a plateau of about $85$--$87\,\%$: $[2\,4\,2]$ gives $85.6\,\%$, $[3\,4\,3]$ gives $85.3\,\%$, $[4\,3\,4]$ gives $86.5\,\%$ and $[4\,4\,4]$ gives $87.0\,\%$; the best of the grid, $[6\,3\,6]$ and $[6\,4\,6]$, reaches $87.2\,\%$, a negligible gain for two more states.
+The model adopted is $[4\,3\,4]$: it is the simplest model within one point of the best of the grid ($87.2\,\%$) and has the poles expected, three of the plant and one of the filter, whereas $[3\,4\,3]$, with no state for the filter, loses $1.2$ points.
+$n_b$ between $2$ and $4$ gives the same fit ($86.3$ to $87.0\,\%$ with $n_a=4$) and $n_b=3$ was kept; $n_k=1$ is the one-sample delay of the sampled plant.
+The two real poles ($z=0.84$ and $z=-0.48$, Table~\ref{tab:poles}) both move with $a_f$, so they represent the motor and the filter together, and one cannot be assigned to each.
+
+\paragraph{The pole at the origin.}
+The position contains the integrator of the motor, a pole on the unit circle that ARMAX cannot identify from a drifting output.
+It was removed by differentiating the output before identification, and added back to the identified denominator, $\texttt{conv(den1, [1 -1])}$, before converting to state space.
+
+\paragraph{Final model.}
+The ARMAX model $A(z^{-1})y_f=B(z^{-1})u+C(z^{-1})e$, with $n_k=1$, has
+\begin{align*}
+A(z^{-1}) &= 1-1.8250\,z^{-1}+0.8399\,z^{-2}+0.3300\,z^{-3}-0.2852\,z^{-4},\\
+B(z^{-1}) &= 0.04094\,z^{-1}-0.05181\,z^{-2}-0.09051\,z^{-3},\\
+C(z^{-1}) &= 1-1.6218\,z^{-1}+1.3136\,z^{-2}-0.6305\,z^{-3}+0.3543\,z^{-4}.
+\end{align*}
+Multiplying the denominator by $(1-z^{-1})$ and applying \texttt{tf2ss} gives a state model of order five ($T_s=0.02$ s, controllable canonical form):
+$$A=\begin{bmatrix} 2.825 & -2.665 & 0.510 & 0.615 & -0.285\\ 1&0&0&0&0\\ 0&1&0&0&0\\ 0&0&1&0&0\\ 0&0&0&1&0\end{bmatrix},\quad
+B=\begin{bmatrix}1\\0\\0\\0\\0\end{bmatrix},$$
+$$C=\begin{bmatrix}0.0409 & -0.0518 & -0.0905 & 0 & 0\end{bmatrix},\quad D=0.$$
+
+\paragraph{Open-loop characterisation.}
+Table~\ref{tab:poles} and Fig.~\ref{fig:model} describe the model.
+The integrator, the motor and the bar mode are all identified; the mode has $\omega_n=27$ rad/s ($4.3$ Hz) and $\zeta=0.31$.
+The magnitude falls at $-20$ dB/dec from the integrator, with a knee at the bar mode and no sharp resonance, in agreement with that damping.
+The phase drops by almost $360^\circ$, since the model has a zero outside the unit circle ($z=2.25$, non-minimum phase, as expected when the tip and not the shaft is measured), which will limit the bandwidth of the controller.
+The zero at $z=-0.98$ makes the notch at the Nyquist frequency and is outside the band of interest.
+The static speed gain is $-84.9$ deg/s per volt, within $6\,\%$ of the $-89.9$ deg/s measured in the potentiometer calibration without the bar (Q2); the negative sign follows $K_p<0$.
+Fig.~\ref{fig:step} shows the step response of the identified dynamics, that is, the tip angular rate for a $1$ V step.
+It is zero in the first sample (the one-sample delay, $n_k=1$), moves slightly the wrong way and then settles at $-84.9$ deg/s in about $0.6$ s, with a small ripple at about $0.3$ s from the bar mode.
+The initial inverse response is that of the non-minimum-phase zero, and the settling time agrees with the slowest poles of Table~\ref{tab:poles}, whose time constants are $1/8.9\approx0.11$ s and $1/8.5\approx0.12$ s (about five time constants in $0.6$ s).
+
+\begin{figure}[t]
+\centering
+\figfile{q3_step}{3.5in}
+\caption{Step response of the identified dynamics (without the integrator) to a $1$ V input: tip angular rate against time. The grey line is the steady state, $-84.9$ deg/s. The first sample is zero (delay) and the small initial move in the opposite direction is the effect of the non-minimum-phase zero.}
+\label{fig:step}
+\end{figure}
+
+\begin{table}[t]
+\centering
+\caption{Poles of the final model.}
+\label{tab:poles}
+\begin{tabular}{@{}lcl@{}}
+\hline
+Pole $z$ & $s=\ln(z)/T_s$ [rad/s] & Interpretation \\ \hline
+$1$ & $0$ & integrator \\
+$0.837$ & $-8.9$ & motor and filter (moves with $a_f$) \\
+$0.733\pm0.420\mathrm{j}$ & $-8.5\pm26\mathrm{j}$ & bar mode \\
+$-0.478$ & none & motor and filter (moves with $a_f$) \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+\centering
+\figfile{q3_pz}{\linewidth}\\[2pt]
+\figfile{q3_bode}{\linewidth}
+\caption{Final model. (a) Poles and zeros in the $z$ plane, with the unit circle; each kind of pole has its own marker. (b) Magnitude and (c) phase of the frequency response from the motor voltage (V) to the tip angle (deg), up to the Nyquist frequency. The phase starts at $+90^\circ$ because the DC gain is negative ($K_p<0$). The vertical line marks the bar mode, $\omega_n=27$ rad/s.}
+\label{fig:model}
+\end{figure}
+
+\paragraph{Validation.}
+Fig.~\ref{fig:val} compares the model with a record that was never used for identification, simulating the model with the same input.
+The model reproduces the switching, the rise times and the oscillation of the bar after each switch ($70.3\,\%$ fit).
+It overestimates the oscillations at the end of the record and does not follow a slow drift.
+The drift explains why the fit of the simulation with the identification data is only $15.5\,\%$, and $75.1\,\%$ once the linear trend is removed (from $70.3\,\%$ to $75.7\,\%$ in the validation set): the error is dominated by the drift of the sensors, which is not modelled, and not by the dynamics.
+The dead zone and the saturation of the motor are not modelled either.
+
+\begin{figure}[t]
+\centering
+\figfile{q3_validacao}{\linewidth}
+\caption{Validation: tip angle measured and simulated by the final model for the validation input, which was not used for identification.}
+\label{fig:val}
+\end{figure}
 
 \end{document}

@@ -46,6 +46,7 @@ variacoes = { ...
     'Ts = 0.10 s',    0.8,  4, 3, 5;
     };
 
+ajustes = zeros(size(variacoes, 1), 1);
 linhas = {'  variacao       af   na  nb    Ts       ajuste [%]'};
 fprintf('%s\n', linhas{1});
 for k = 1:size(variacoes, 1)
@@ -72,6 +73,7 @@ for k = 1:size(variacoes, 1)
     ysim = filter(num_i, den_i, uvf);
     fit_i = 100*(1 - norm(yvf-ysim)/norm(yvf-mean(yvf)));
 
+    ajustes(k) = fit_i;
     linhas{end+1} = sprintf('  %-14s %4.2f %3d %3d  %5.2f       %5.1f', v{1}, af_i, na_i, nb_i, Ts_i, fit_i);
     fprintf('%s\n', linhas{end});
 end
@@ -80,3 +82,6 @@ fid = fopen('../results/resumo.txt', 'a');
 fprintf(fid, '--- L7: revisao (%s) ---\n', nome);
 fprintf(fid, '%s\n', linhas{:});
 fclose(fid);
+
+% Guardar para as figuras do relatorio (figuras_q3.m)
+save('../results/revisao.mat', 'variacoes', 'ajustes')

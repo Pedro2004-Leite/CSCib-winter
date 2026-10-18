@@ -12,7 +12,7 @@ t0 = 5;                 % segundos iniciais descartados
 n0 = round(t0/Ts) + 1;
 
 %% Dados de identificacao
-ficheiro_id = '../data/exp_sinewave.mat';  % trocar para outro ficheiro se preciso
+ficheiro_id = '../data//exp2_quad_1V.mat';  % trocar para outro ficheiro se preciso
 [~, nome_id] = fileparts(ficheiro_id);
 S = load(ficheiro_id);
 utrend = S.dados.signals.values(:, 1);  % excitacao [V]
@@ -46,6 +46,7 @@ uv = detrend(sv(n0:end, 1));
 % do ruido do ajuste, e nao justifica os estados extra na Seccao 5 (LQG).
 ordens = [4 3 4 1];   % [na nb nc nk] fixadas na revisao do L7
 linhas = {'  na  nb  nc    ajuste [%]'};
+grelha = zeros(5, 4);   % ajuste [%]: linha na-1 (na=2..6), coluna nb (nb=1..4)
 fprintf('%s\n', linhas{1});
 for na = 2:6
     for nb = 1:4
@@ -54,6 +55,7 @@ for na = 2:6
         [den_i, num_i] = polydata(th_i);
         ysim = filter(num_i, den_i, uv);
         fit_i = 100*(1 - norm(yv-ysim)/norm(yv-mean(yv)));
+        grelha(na-1, nb) = fit_i;
         linhas{end+1} = sprintf('  %2d  %2d  %2d     %5.1f', na, nb, nc, fit_i);
         fprintf('%s\n', linhas{end});
     end
@@ -83,7 +85,10 @@ saveas(gcf, sprintf('../results/%s.png', nome_id))
 fid = fopen(sprintf('../results/%s_ordens.txt', nome_id), 'w');
 fprintf(fid, '%s\n', linhas{:});
 fprintf(fid, 'Escolhido: na=%d, nb=%d, nc=%d (ajuste %.1f %%)\n', na, nb, nc, ajuste);
+% Polinomios do modelo ARMAX em potencias de z^-1: A(z)y = B(z)u + C(z)e
+fprintf(fid, 'A = %s\nB = %s\nC = %s\n', mat2str(th.A, 6), mat2str(th.B, 6), mat2str(th.C, 6));
 fclose(fid);
 
 if ~exist('../models', 'dir'), mkdir('../models'); end
 save(sprintf('../models/%s.mat', nome_id), 'num1', 'den1', 'Ts')
+save(sprintf('../results/%s_grelha.mat', nome_id), 'grelha')   % para as figuras do relatorio
