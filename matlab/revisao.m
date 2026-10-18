@@ -1,3 +1,4 @@
+%% 
 %% Revisao da identificacao (L7, tarefa 1)
 % Varia o polo do filtro, as ordens do modelo e o periodo de amostragem e
 % compara os modelos obtidos nos dados de validacao. A tabela e mostrada na
@@ -26,16 +27,23 @@ yv = sv(:,2)*Kp + sv(:,3)*Ke;
 %% Variacoes: filtro (af), ordens (na, nb) e amostragem (fator de dizimacao)
 % O ajuste e sempre medido nos dados de validacao, processados da mesma
 % maneira que na identificacao. A linha "base" deve reproduzir o ajuste
-% escolhido no L5.
+% escolhido no L5. O varrimento de af cobre a zona em torno do valor usado
+% (0.8) para mostrar que o ajuste e pouco sensivel entre 0.7 e 0.9, e o
+% varrimento de Ts mostra a degradacao quando o filtro deixa de proteger a
+% banda (a Ts maiores a dinamica da barra cai fora da banda de Nyquist).
 variacoes = { ...
-    'base',          0.8, 4, 3, 1;
-    'filtro af=0.5', 0.5, 4, 3, 1;
-    'filtro af=0.9', 0.9, 4, 3, 1;
-    'ordens [3 3]',  0.8, 3, 3, 1;
-    'ordens [5 3]',  0.8, 5, 3, 1;
-    'ordens [4 2]',  0.8, 4, 2, 1;
-    'Ts = 0.04 s',   0.8, 4, 3, 2;
-    'Ts = 0.06 s',   0.8, 4, 3, 3;
+    'base',           0.8,  4, 3, 1;
+    'filtro af=0.5',  0.5,  4, 3, 1;
+    'filtro af=0.7',  0.7,  4, 3, 1;
+    'filtro af=0.9',  0.9,  4, 3, 1;
+    'filtro af=0.95', 0.95, 4, 3, 1;
+    'ordens [3 3]',   0.8,  3, 3, 1;
+    'ordens [5 3]',   0.8,  5, 3, 1;
+    'ordens [6 3]',   0.8,  6, 3, 1;
+    'ordens [4 2]',   0.8,  4, 2, 1;
+    'Ts = 0.04 s',    0.8,  4, 3, 2;
+    'Ts = 0.06 s',    0.8,  4, 3, 3;
+    'Ts = 0.10 s',    0.8,  4, 3, 5;
     };
 
 linhas = {'  variacao       af   na  nb    Ts       ajuste [%]'};

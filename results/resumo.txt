@@ -49,3 +49,17 @@ L6 - Validacao do modelo com integrador
   Ajuste validacao (dados nunca usados): 70.3 %
   Ajuste simulacao (dados de treino):    15.5 %
   Sem deriva linear: validacao 75.7 %, treino 75.1 %
+--- L7: revisao (exp2_quad_1V) ---
+  variacao       af   na  nb    Ts       ajuste [%]
+  base           0.80   4   3   0.02        86.5
+  filtro af=0.5  0.50   4   3   0.02        78.0
+  filtro af=0.7  0.70   4   3   0.02        87.1
+  filtro af=0.9  0.90   4   3   0.02        84.4
+  filtro af=0.95 0.95   4   3   0.02        82.8
+  ordens [3 3]   0.80   3   3   0.02        79.7
+  ordens [5 3]   0.80   5   3   0.02        85.8
+  ordens [6 3]   0.80   6   3   0.02        87.2
+  ordens [4 2]   0.80   4   2   0.02        86.3
+  Ts = 0.04 s    0.80   4   3   0.04        83.0
+  Ts = 0.06 s    0.80   4   3   0.06        82.0
+  Ts = 0.10 s    0.80   4   3   0.10        66.6
